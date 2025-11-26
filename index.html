@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>retrobloks - Classic Falling Block Puzzle</title>
+    <meta name="description" content="The classic block puzzle reborn! Stack, clear, and chase high scores in this beautifully polished falling block game.">
+    <meta name="keywords" content="retrobloks, tetris, blocks, puzzle, game, iOS, iPhone, iPad">
+    <link rel="apple-touch-icon" href="app-icon.png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf, #ff006e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #8892b0;
+            margin-bottom: 40px;
+        }
+        
+        .app-preview {
+            margin: 40px 0;
+        }
+        
+        .app-preview img {
+            max-width: 280px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
+        }
+        
+        /* Placeholder for app screenshot */
+        .phone-frame {
+            width: 250px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #2a2a3a 0%, #1a1a2a 100%);
+            border-radius: 35px;
+            padding: 12px;
+            box-shadow: 
+                0 25px 60px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(0, 212, 255, 0.2),
+                inset 0 1px 1px rgba(255,255,255,0.1);
+            position: relative;
+        }
+        
+        .phone-notch {
+            width: 80px;
+            height: 25px;
+            background: #1a1a2a;
+            border-radius: 0 0 15px 15px;
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 25px;
+            background: #0d0d1a;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 50px 0;
+            text-align: left;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .feature h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #00d4ff;
+        }
+        
+        .feature p {
+            font-size: 0.9rem;
+            color: #8892b0;
+        }
+        
+        .download-section {
+            margin: 50px 0;
+        }
+        
+        .app-store-badge {
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+        
+        .app-store-badge:hover {
+            transform: scale(1.05);
+        }
+        
+        .app-store-badge img {
+            height: 50px;
+        }
+        
+        /* Placeholder badge style */
+        .badge-placeholder {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            border: 1px solid #333;
+        }
+        
+        .badge-placeholder span {
+            display: block;
+            font-size: 0.7rem;
+            color: #999;
+        }
+        
+        footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-links {
+            margin-bottom: 20px;
+        }
+        
+        .footer-links a {
+            color: #8892b0;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #00d4ff;
+        }
+        
+        .copyright {
+            color: #555;
+            font-size: 0.8rem;
+        }
+        
+        /* Decorative blocks */
+        .blocks-decoration {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 30px 0;
+        }
+        
+        .block {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .block:nth-child(1) { background: #00d4ff; animation-delay: 0s; }
+        .block:nth-child(2) { background: #7b2cbf; animation-delay: 0.2s; }
+        .block:nth-child(3) { background: #ff006e; animation-delay: 0.4s; }
+        .block:nth-child(4) { background: #ffbe0b; animation-delay: 0.6s; }
+        .block:nth-child(5) { background: #00f5d4; animation-delay: 0.8s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .tagline {
+                font-size: 1rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">retrobloks</h1>
+            <p class="tagline">Classic Falling Block Puzzle</p>
+            
+            <div class="blocks-decoration">
+                <div class="block"></div>
+                <div class="block"></div>
+                <div class="block"></div>
+                <div class="block"></div>
+                <div class="block"></div>
+            </div>
+        </header>
+        
+        <section class="app-preview">
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <canvas id="gameCanvas"></canvas>
+            </div>
+        </section>
+        
+        <script>
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = 200;
+            canvas.height = 400;
+            
+            const COLS = 10;
+            const ROWS = 20;
+            const BLOCK_SIZE = canvas.width / COLS;
+            
+            const COLORS = [
+                '#00d4ff', // cyan
+                '#3366ff', // blue
+                '#ff9500', // orange
+                '#ffcc00', // yellow
+                '#30d158', // green
+                '#bf5af2', // purple
+                '#ff375f'  // red
+            ];
+            
+            const SHAPES = [
+                [[1,1,1,1]],                          // I
+                [[1,0,0],[1,1,1]],                    // J
+                [[0,0,1],[1,1,1]],                    // L
+                [[1,1],[1,1]],                        // O
+                [[0,1,1],[1,1,0]],                    // S
+                [[0,1,0],[1,1,1]],                    // T
+                [[1,1,0],[0,1,1]]                     // Z
+            ];
+            
+            let board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+            let currentPiece = null;
+            let currentX = 0;
+            let currentY = 0;
+            let currentColor = '';
+            
+            function newPiece() {
+                const idx = Math.floor(Math.random() * SHAPES.length);
+                currentPiece = SHAPES[idx];
+                currentColor = COLORS[idx];
+                currentX = Math.floor((COLS - currentPiece[0].length) / 2);
+                currentY = 0;
+            }
+            
+            function collision(px, py, piece) {
+                for (let y = 0; y < piece.length; y++) {
+                    for (let x = 0; x < piece[y].length; x++) {
+                        if (piece[y][x]) {
+                            const newX = px + x;
+                            const newY = py + y;
+                            if (newX < 0 || newX >= COLS || newY >= ROWS) return true;
+                            if (newY >= 0 && board[newY][newX]) return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            
+            function merge() {
+                for (let y = 0; y < currentPiece.length; y++) {
+                    for (let x = 0; x < currentPiece[y].length; x++) {
+                        if (currentPiece[y][x]) {
+                            if (currentY + y >= 0) {
+                                board[currentY + y][currentX + x] = currentColor;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            function clearLines() {
+                for (let y = ROWS - 1; y >= 0; y--) {
+                    if (board[y].every(cell => cell !== 0)) {
+                        board.splice(y, 1);
+                        board.unshift(Array(COLS).fill(0));
+                        y++;
+                    }
+                }
+            }
+            
+            function drawBlock(x, y, color) {
+                const px = x * BLOCK_SIZE;
+                const py = y * BLOCK_SIZE;
+                const size = BLOCK_SIZE - 1;
+                
+                // Main block
+                ctx.fillStyle = color;
+                ctx.fillRect(px, py, size, size);
+                
+                // Highlight
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.fillRect(px, py, size, size * 0.2);
+                ctx.fillRect(px, py, size * 0.15, size);
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.fillRect(px, py + size * 0.8, size, size * 0.2);
+                ctx.fillRect(px + size * 0.85, py, size * 0.15, size);
+            }
+            
+            function draw() {
+                // Clear
+                ctx.fillStyle = 'rgba(13, 13, 26, 0.95)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Grid
+                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+                ctx.lineWidth = 1;
+                for (let x = 0; x <= COLS; x++) {
+                    ctx.beginPath();
+                    ctx.moveTo(x * BLOCK_SIZE, 0);
+                    ctx.lineTo(x * BLOCK_SIZE, canvas.height);
+                    ctx.stroke();
+                }
+                for (let y = 0; y <= ROWS; y++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y * BLOCK_SIZE);
+                    ctx.lineTo(canvas.width, y * BLOCK_SIZE);
+                    ctx.stroke();
+                }
+                
+                // Board
+                for (let y = 0; y < ROWS; y++) {
+                    for (let x = 0; x < COLS; x++) {
+                        if (board[y][x]) {
+                            drawBlock(x, y, board[y][x]);
+                        }
+                    }
+                }
+                
+                // Current piece
+                if (currentPiece) {
+                    for (let y = 0; y < currentPiece.length; y++) {
+                        for (let x = 0; x < currentPiece[y].length; x++) {
+                            if (currentPiece[y][x] && currentY + y >= 0) {
+                                drawBlock(currentX + x, currentY + y, currentColor);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            function update() {
+                if (!currentPiece) {
+                    newPiece();
+                }
+                
+                if (collision(currentX, currentY + 1, currentPiece)) {
+                    merge();
+                    clearLines();
+                    newPiece();
+                    
+                    // Reset if topped out
+                    if (collision(currentX, currentY, currentPiece)) {
+                        board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+                    }
+                } else {
+                    currentY++;
+                }
+                
+                // Random horizontal movement for variety
+                if (Math.random() < 0.3) {
+                    const dir = Math.random() < 0.5 ? -1 : 1;
+                    if (!collision(currentX + dir, currentY, currentPiece)) {
+                        currentX += dir;
+                    }
+                }
+                
+                // Random rotation
+                if (Math.random() < 0.15) {
+                    const rotated = currentPiece[0].map((_, i) => 
+                        currentPiece.map(row => row[i]).reverse()
+                    );
+                    if (!collision(currentX, currentY, rotated)) {
+                        currentPiece = rotated;
+                    }
+                }
+            }
+            
+            function gameLoop() {
+                update();
+                draw();
+            }
+            
+            // Start game loop
+            newPiece();
+            draw();
+            setInterval(gameLoop, 400);
+        </script>
+        </section>
+        
+        <section class="features">
+            <div class="feature">
+                <div class="feature-icon">🎮</div>
+                <h3>Classic Gameplay</h3>
+                <p>The beloved block-stacking puzzle you know and love, polished to perfection.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✨</div>
+                <h3>Beautiful Visuals</h3>
+                <p>Stunning effects, smooth animations, and a modern aesthetic.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Precise Controls</h3>
+                <p>Intuitive touch controls with soft drop, hard drop, and hold piece.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🚫</div>
+                <h3>No Ads</h3>
+                <p>Pure, uninterrupted gameplay. No ads, no distractions.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📶</div>
+                <h3>Play Offline</h3>
+                <p>No internet required. Play anywhere, anytime.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🏆</div>
+                <h3>Chase High Scores</h3>
+                <p>15 starting levels and back-to-back bonuses for maximum points.</p>
+            </div>
+        </section>
+        
+        <section class="download-section">
+            <!-- Replace with actual App Store link when available -->
+            <a href="#" class="app-store-badge">
+                <div class="badge-placeholder">
+                    <span>Download on the</span>
+                    App Store
+                </div>
+            </a>
+            <!-- 
+            When your app is live, replace with:
+            <a href="https://apps.apple.com/app/retrobloks/idYOURAPPID" class="app-store-badge">
+                <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store">
+            </a>
+            -->
+        </section>
+        
+        <footer>
+            <div class="footer-links">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="mailto:your.email@example.com">Contact</a>
+            </div>
+            <p class="copyright">© 2025 retrobloks. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
